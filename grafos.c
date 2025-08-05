@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "biblioteca_auxiliar.h"
+#include "Stack.h"
+#include "Queue.h"
+#define MAX_VERTICES 100
+#define MAX_NAME_LENGTH 30
 
 // Estrutura para ponto (vértice)
 typedef struct Point {
@@ -163,6 +166,29 @@ void depth_first_search(p_graph g, int start, boolean *visited) {
     }
 }
 
+void dfs(p_graph g, int start) {
+    int visited[MAX_VERTICES] = {0};
+    p_stack s = create_stack();
+
+    push(s, start);
+    visited[start] = 1;
+
+    while (!is_stack_empty(s)) {
+        int v = pop(s);
+        printf("Visitou: %s\n", g->coordinates[v].name);
+
+        for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox){
+            if (!visited[u->neighbor]) {
+                visited[u->neighbor] = 1;
+                push(s, u->neighbor);
+            }
+        }
+    }
+
+    free_stack(s);
+}
+
+
 // Main
 int main() {
     p_graph g = create_graph(4);
@@ -193,6 +219,7 @@ int main() {
         free(visited);
     }   
 
+    Queue *queue = create_queue(5);
     free_graph(g);
     printf("Programa finalizado.\n");
     return 0;

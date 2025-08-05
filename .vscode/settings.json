@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "biblioteca_fila.h": "c",
+        "queue.h": "c"
+    }
+}
