@@ -1,11 +1,6 @@
 //.h da biblioteca auxiliar 
 #ifndef STACK_H
 #define STACK_H
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include "Stack.h"
 
 // Tipo booleano
 typedef enum Boolean {
@@ -32,7 +27,5 @@ int is_stack_empty(p_stack s);
 void push(p_stack s, int neighbor);
 int pop(p_stack s);
 void free_stack(p_stack s);
-
-
 
 #endif

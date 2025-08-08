@@ -1,24 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <string.h>
 #include "Queue.h"
 
 /*
 Esta biblioteca auxilia na manipulação de filas
 Ela inclui funções para criar, destruir e manipular filas,
 */
-
-
-typedef struct Queue {
-    int *data;       
-    int front;      
-    int rear;       
-    int size;       
-    int capacity;  
-} Queue;
-
-typedef Queue* p_queue;
 
 /*
     Function to create a queue with a given capacity

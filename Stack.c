@@ -1,29 +1,7 @@
 //Biblioteca auxiliar para o trabalho de Grafos, criar fila e pilha
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <string.h>
 #include "Stack.h"
-
-typedef enum Boolean {
-    true = 1,
-    false = 0
-} boolean;
-
-typedef struct Stack_node{
-    int neighbor;
-    struct Stack_node* prox;
-}Stack_node;
-
-typedef struct Stack_node* p_stack_node;
-
-typedef struct Stack {
-    Stack_node* top;
-    int size;       
-} Stack;
-
-typedef Stack* p_stack;
+#include <stdio.h>
 
 p_stack create_stack() {
     p_stack s = malloc(sizeof(Stack));
