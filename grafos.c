@@ -411,6 +411,14 @@ void dls(p_graph g, int start, int limit) {
     dls_recursive(g, start, visited, 0, limit);
 }
 
+void ids(p_graph g, int start, int max_limit) {
+    printf("=== IDS (limite máximo = %d) ===\n", max_limit);
+    for (int limit = 0; limit <= max_limit; limit++) {
+        printf("\n--- Iteração com limite %d ---\n", limit);
+        int visited[MAX_VERTICES] = {0};
+        dls_recursive(g, start, visited, 0, limit);
+    }
+}
 
 
 void listar_pontos(p_graph g) {
@@ -496,15 +504,28 @@ int main() {
     printf("Total de passos (DFS recursiva): %d\n", dfs_steps);
     free(visited);
 
-    // ===== 10) UCS (Uniform Cost Search) =====
+    // ===== 10) DLS (Depth-Limited Search) =====
+    int dls_limit;
+    printf("\nDigite o limite de profundidade para DLS: ");
+    scanf("%d", &dls_limit);
+    dls(g, origem, dls_limit);
+
+    // ===== 11) IDS (Iterative Deepening Search) =====
+    int ids_max_limit;
+    printf("\nDigite o limite máximo de profundidade para IDS: ");
+    scanf("%d", &ids_max_limit);
+    ids(g, origem, ids_max_limit);
+
+    // ===== 12) UCS (Uniform Cost Search) =====
     printf("\n=== Uniform Cost Search (UCS) — menor custo acumulado ===\n");
     uniform_cost_search(g, origem, destino);
 
-    // ===== 11) Fim =====
+    // ===== 13) Fim =====
     free_graph(g);
     printf("\nPrograma finalizado.\n");
     return 0;
 }
+
 
 // Queue implementation
 
