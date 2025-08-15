@@ -5,53 +5,29 @@
 #define MAX_VERTICES 100
 #define MAX_NAME_LENGTH 30
 
-
 typedef enum Boolean {
     true = 1,
     false = 0
 } boolean;
 
-//// Queue functions
-
 typedef struct Queue {
-    int *data;       
+    int *data;      
     int front;      
-    int rear;       
-    int size;       
+    int rear;      
+    int size;      
     int capacity;  
 } Queue;
 
-typedef Queue* p_queue;
-
-p_queue create_queue(int capacity);
-int is_queue_empty(p_queue q);
-int is_queue_full(p_queue q);
-void enqueue(p_queue q, int value);
-int dequeue(p_queue q);
-void free_queue(p_queue q);
-
-// Stack Functions
 typedef struct Stack_node{
     int neighbor;
     struct Stack_node* prox;
 }Stack_node;
 
-typedef struct Stack_node* p_stack_node;
-
 typedef struct Stack {
     Stack_node* top;
-    int size;       
+    int size;      
 } Stack;
 
-typedef Stack* p_stack;
-
-p_stack create_stack();
-int is_stack_empty(p_stack s);
-void push(p_stack s, int neighbor);
-int pop(p_stack s);
-void free_stack(p_stack s);
-
-// Priority Queue for Uniform Cost Search (UCS)
 typedef struct {
     int vertex;
     float cost;
@@ -63,13 +39,33 @@ typedef struct {
     int capacity;
 } PriorityQueue;
 
-PriorityQueue* create_pq(int capacity); 
+
+typedef Queue* p_queue;
+typedef struct Stack_node* p_stack_node;
+typedef Stack* p_stack;
+
+//Queue functions
+p_queue create_queue(int capacity);
+int is_queue_empty(p_queue q);
+int is_queue_full(p_queue q);
+void enqueue(p_queue q, int value);
+int dequeue(p_queue q);
+void free_queue(p_queue q);
+
+//Stack functions
+p_stack create_stack();
+int is_stack_empty(p_stack s);
+void push(p_stack s, int neighbor);
+int pop(p_stack s);
+void free_stack(p_stack s);
+
+// Priority Queue for Uniform Cost Search (UCS)
+PriorityQueue* create_pq(int capacity);
 void swap(PQNode *a, PQNode *b);
-void pq_push(PriorityQueue *pq, int vertex, float cost); 
-PQNode pq_pop(PriorityQueue *pq); 
+void pq_push(PriorityQueue *pq, int vertex, float cost);
+PQNode pq_pop(PriorityQueue *pq);
 int pq_empty(PriorityQueue *pq);
 void free_pq(PriorityQueue *pq);
-
 
 // Estrutura para ponto (vértice)
 typedef struct Point {
@@ -107,8 +103,6 @@ float calculate_manhattan(Point a, Point b) {
     return fabs(a.pos_x - b.pos_x) + fabs(a.pos_y - b.pos_y);
 }
 
-
-
 // Cria grafo
 p_graph create_graph(int size) {
     p_graph new_g = malloc(sizeof(Graph));
@@ -117,9 +111,11 @@ p_graph create_graph(int size) {
     new_g->coordinates = malloc(size * sizeof(Point));
     new_g->busy = calloc(size, sizeof(boolean));  // Inicializa como false
 
+
     for (int i = 0; i < size; i++) {
         new_g->list_adjacency[i] = NULL;
     }
+
 
     return new_g;
 }
@@ -160,7 +156,7 @@ void free_graph(p_graph g){
     return;    
 }
 
-/* 
+/*
     function to insert a node in the adjacency list
     This function creates a new node with the given neighbor and weight,
     and inserts it at the beginning of the list.
@@ -196,7 +192,6 @@ void insert_edge(p_graph g, int src, int dest, DistanceFunction distance_fn) {
     g->list_adjacency[dest] = insert_list(g->list_adjacency[dest], src, distance);
 }
 
-
 /*
     Function to print the graph
     This function prints the adjacency list of each vertex in the graph.
@@ -216,46 +211,54 @@ void print_graph(p_graph g) {
     }
 }
 
-//void depth_first_search(p_graph g, int start, boolean *visited){}
-
-int dfs_steps = 0;
-boolean found = false;
-void recursive_dfs_with_goal(p_graph g, int v, int goal, boolean *visited) {
-    if (found || !g->busy[v] || visited[v]) return;
+void recursive_dfs_with_goal(p_graph g, int v, int goal, boolean *visited, int *dfs_steps, boolean *found) {
+    if (*found || !g->busy[v] || visited[v]) return;
 
     visited[v] = true;
-    dfs_steps++;
+    (*dfs_steps)++;
     printf("Visitou: %s\n", g->coordinates[v].name);
 
     if (v == goal) {
         printf("Objetivo encontrado!\n");
-        found = true;
+        *found = true;
         return;
     }
 
     for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox) {
         if (!visited[u->neighbor]) {
-            recursive_dfs_with_goal(g, u->neighbor, goal, visited);
+            recursive_dfs_with_goal(g, u->neighbor, goal, visited, dfs_steps, found);
         }
     }
+}
+
+int dfs_recursive(p_graph g, int v, int goal, boolean *visited) {
+    int dfs_steps = 0;
+    boolean found = false;
+    recursive_dfs_with_goal(g, v, goal, visited, &dfs_steps, &found);
+
+    return dfs_steps;
 }
 
 void dfs(p_graph g, int start, int goal) {
     int visited[MAX_VERTICES] = {0};
     p_stack s = create_stack();
 
+
     push(s, start);
     visited[start] = 1;
+
 
     while (!is_stack_empty(s)) {
         int v = pop(s);
         printf("Visitou: %s\n", g->coordinates[v].name);
+
 
         if (v == goal) {
             printf("Objetivo encontrado: %s\n", g->coordinates[v].name);
             free_stack(s);
             return;
         }
+
 
         for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox){
             if (!visited[u->neighbor]) {
@@ -264,6 +267,7 @@ void dfs(p_graph g, int start, int goal) {
             }
         }
     }
+
 
     printf("Objetivo não encontrado.\n");
     free_stack(s);
@@ -281,24 +285,29 @@ int breadth_first_search(p_graph g, int start, int goal) {
     int *visited = calloc(g->number_of_vertices, sizeof(int));
     int steps = 0;
 
+
     for (int i = 0; i < g->number_of_vertices; i++) {
         father[i] = -1;
     }
+
 
     p_queue q = create_queue(g->number_of_vertices);
     enqueue(q, start);
     visited[start] = 1;
     father[start] = start;
 
+
     while (!is_queue_empty(q)) {
         int v = dequeue(q);
         steps++;
         printf("Visitou: %s\n", g->coordinates[v].name);
 
+
         if (v == goal) {
             printf("Objetivo encontrado!\n");
             break;
         }
+
 
         for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox) {
             if (!visited[u->neighbor]) {
@@ -309,7 +318,9 @@ int breadth_first_search(p_graph g, int start, int goal) {
         }
     }
 
+
     printf("Total de passos: %d\n", steps);
+
 
     // Se quiser imprimir o caminho de volta
     if (visited[goal]) {
@@ -324,6 +335,7 @@ int breadth_first_search(p_graph g, int start, int goal) {
         printf("Objetivo não alcançado.\n");
     }
 
+
     free(visited);
     free(father);
     free_queue(q);
@@ -335,28 +347,35 @@ void uniform_cost_search(p_graph g, int start, int goal) {
     int *father = malloc(sizeof(int) * g->number_of_vertices);
     int *visited = calloc(g->number_of_vertices, sizeof(int));
 
+
     for (int i = 0; i < g->number_of_vertices; i++) {
         cost[i] = INFINITY;
         father[i] = -1;
     }
     cost[start] = 0;
 
+
     PriorityQueue *pq = create_pq(g->number_of_vertices);
     pq_push(pq, start, 0);
+
 
     while (!pq_empty(pq)) {
         PQNode node = pq_pop(pq);
         int v = node.vertex;
 
+
         if (visited[v]) continue;
         visited[v] = 1;
 
+
         printf("Visitou: %s (custo: %.2f)\n", g->coordinates[v].name, node.cost);
+
 
         if (v == goal) {
             printf("Objetivo encontrado!\n");
             break;
         }
+
 
         for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox) {
             float new_cost = cost[v] + u->weight;
@@ -367,6 +386,7 @@ void uniform_cost_search(p_graph g, int start, int goal) {
             }
         }
     }
+
 
     // Mostrar caminho
     if (visited[goal]) {
@@ -384,6 +404,7 @@ void uniform_cost_search(p_graph g, int start, int goal) {
         printf("Objetivo não alcançado.\n");
     }
 
+
     free(cost);
     free(father);
     free(visited);
@@ -394,9 +415,11 @@ void dls_recursive(p_graph g, int v, int visited[], int depth, int limit) {
     visited[v] = 1;
     printf("Visitou: %s (profundidade %d)\n", g->coordinates[v].name, depth);
 
+
     if (depth == limit) {
         return;
     }
+
 
     for (p_node u = g->list_adjacency[v]; u != NULL; u = u->prox) {
         if (!visited[u->neighbor]) {
@@ -420,8 +443,7 @@ void ids(p_graph g, int start, int max_limit) {
     }
 }
 
-
-void listar_pontos(p_graph g) {
+void list_vertices(p_graph g) {
     printf("Pontos disponíveis:\n");
     for (int i = 0; i < g->number_of_vertices; i++) {
         if (g->busy[i]) {
@@ -439,17 +461,17 @@ int get_vertex_index_by_name(p_graph g, const char *name) {
     return -1;  // não encontrado
 }
 
-
-
 int main() {
     // ===== 1) Criar grafo =====
     p_graph g = create_graph(4);
+
 
     // ===== 2) Inserir vértices (nome e coordenadas) =====
     set_coordinates(g, 0, 0, "Casa A");
     set_coordinates(g, 3, 4, "Casa B");
     set_coordinates(g, 5, 2, "Casa C");
     set_coordinates(g, 1, 1, "Casa D");
+
 
     // ===== 3) Distância exemplo =====
     float d = calculate_euclidean(g->coordinates[0], g->coordinates[1]);
@@ -458,19 +480,23 @@ int main() {
            g->coordinates[1].name,
            d);
 
+
     // ===== 4) Inserir arestas (ponderadas pela distância escolhida) =====
     insert_edge(g, 0, 1, calculate_euclidean);
     insert_edge(g, 1, 2, calculate_euclidean);
     insert_edge(g, 0, 3, calculate_euclidean);
     insert_edge(g, 2, 3, calculate_euclidean);
 
+
     // ===== 5) Mostrar o grafo =====
     printf("\n=== Lista de Adjacência ===\n");
     print_graph(g);
 
+
     // ===== 6) Escolher origem e destino por nome =====
     printf("\n=== Pontos Disponíveis ===\n");
-    listar_pontos(g);
+    list_vertices(g);
+
 
     char origem_nome[30], destino_nome[30];
     printf("\nDigite o nome do ponto de partida: ");
@@ -478,8 +504,10 @@ int main() {
     printf("Digite o nome do ponto de destino: ");
     scanf(" %[^\n]", destino_nome);
 
+
     int origem = get_vertex_index_by_name(g, origem_nome);
     int destino = get_vertex_index_by_name(g, destino_nome);
+
 
     if (origem == -1 || destino == -1) {
         printf("Erro: ponto(s) não encontrado(s).\n");
@@ -487,20 +515,21 @@ int main() {
         return 0;
     }
 
+
     // ===== 7) BFS =====
     printf("\n=== Breadth First Search (BFS) — menor nº de arestas ===\n");
     breadth_first_search(g, origem, destino);
+
 
     // ===== 8) DFS (iterativa) =====
     printf("\n=== Depth First Search (DFS - Iterativa) ===\n");
     dfs(g, origem, destino);
 
+
     // ===== 9) DFS (recursiva) =====
     printf("\n=== Depth First Search (DFS - Recursiva) ===\n");
     boolean *visited = calloc(g->number_of_vertices, sizeof(boolean));
-    dfs_steps = 0;
-    found = false;
-    recursive_dfs_with_goal(g, origem, destino, visited);
+    int dfs_steps = dfs_recursive(g, origem, destino, visited);
     printf("Total de passos (DFS recursiva): %d\n", dfs_steps);
     free(visited);
 
@@ -526,9 +555,7 @@ int main() {
     return 0;
 }
 
-
 // Queue implementation
-
 p_queue create_queue(int capacity) {
     p_queue q = malloc(sizeof(Queue));
     if (q == NULL) {
@@ -611,8 +638,6 @@ void free_queue(p_queue q) {
     free(q);
 }
 
-// Stack implementation
-
 p_stack create_stack() {
     p_stack s = malloc(sizeof(Stack));
     s->top = NULL;
@@ -655,8 +680,6 @@ void free_stack(p_stack s) {
     }
     free(s);
 }
-
-// Queue with priority implementation (for UCS)
 
 PriorityQueue* create_pq(int capacity) {
     PriorityQueue *pq = malloc(sizeof(PriorityQueue));
