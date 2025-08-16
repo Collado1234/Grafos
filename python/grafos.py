@@ -1,3 +1,4 @@
+import heapq
 class Grafo_MatrizAdjacencia:
     def __init__(self, vertices):
         self.vertices = vertices
@@ -25,6 +26,10 @@ class Grafo_MatrizAdjacencia:
                     arestas.append((i, j, self.matriz[i][j]))
         return arestas
     
+    def exibir_matriz(self):
+        for linha in self.matriz:
+            print(" ".join(f"{peso:3}" for peso in linha))
+        
     def depth_first_search(self, inicio, objetivo):
         visitado = [False] * self.vertices
         pai = [-1] * self.vertices
@@ -59,8 +64,73 @@ class Grafo_MatrizAdjacencia:
 
         return None, pai  # Retorna None se não encontrar caminho
 
-    def exibir_matriz(self):
-        for linha in self.matriz:
-            print(" ".join(f"{peso:3}" for peso in linha))
-    
-    
+    def breadth_first_search(self, inicio, objetivo):
+        visitado = [False] * self.vertices
+        fila = []
+        pai = [-1] * self.vertices
+
+        # Inicialização
+        fila.append(inicio)
+        visitado[inicio] = True
+        pai[inicio] = inicio
+
+        while fila:
+            vertice = fila.pop(0)
+
+            # Verifica se atingiu o objetivo
+            if vertice == objetivo:
+                # Reconstrução do caminho
+                caminho = []
+                v = objetivo
+                while v != inicio:
+                    caminho.append(v)
+                    v = pai[v]
+                caminho.append(inicio)
+                caminho.reverse()
+                return caminho, pai
+
+            # Explora vizinhos
+            for vizinho in range(self.vertices):
+                if self.matriz[vertice][vizinho] != 0 and not visitado[vizinho]:
+                    fila.append(vizinho)
+                    visitado[vizinho] = True
+                    pai[vizinho] = vertice
+
+        return None, pai
+
+    def uniform_cost_search(self, inicio, objetivo):
+        custo = [float('inf')] * self.vertices
+        pai = [-1] * self.vertices
+        visitado = [False] * self.vertices
+
+        custo[inicio] = 0
+        fila = [(0, inicio)]
+        heapq.heapify(fila)
+
+        while fila:
+            custo_atual, vertice = heapq.heappop(fila)
+
+            if visitado[vertice]:
+                continue
+
+            visitado[vertice] = True
+
+            if vertice == objetivo:
+                caminho = []
+                v = objetivo
+                while v != inicio:
+                    caminho.append(v)
+                    v = pai[v]
+                caminho.append(inicio)
+                caminho.reverse()
+                return caminho, pai
+
+            for vizinho in range(self.vertices):
+                if self.matriz[vertice][vizinho] != 0:
+                    novo_custo = custo_atual + self.matriz[vertice][vizinho]
+                    if novo_custo < custo[vizinho]:
+                        custo[vizinho] = novo_custo
+                        pai[vizinho] = vertice
+                        heapq.heappush(fila, (novo_custo, vizinho))
+
+        return None, pai
