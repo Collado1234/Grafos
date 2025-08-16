@@ -1,20 +1,27 @@
 from grafos import Grafo_MatrizAdjacencia
-
 if __name__ == "__main__":
+    # Criar grafo com 5 vértices
     g = Grafo_MatrizAdjacencia(5)
 
+    # Definir nomes para os vértices
+    nomes = ["Casa A", "Casa B", "Casa C", "Casa D", "Casa E"]
+    for i, nome in enumerate(nomes):
+        g.definir_nome(i, nome)
+
+    # Adicionar arestas (com pesos)
     g.adicionar_aresta(0, 1, 2)
     g.adicionar_aresta(0, 2, 4)
     g.adicionar_aresta(1, 2, 1)
     g.adicionar_aresta(1, 3, 7)
     g.adicionar_aresta(2, 4, 3)
 
+    # Exibir matriz
     print("Matriz de adjacência:")
     g.exibir_matriz()
     print()
 
-    inicio = 0
-    destino = 4
+    inicio = 0  # Casa A
+    destino = 4  # Casa E
 
     buscas = [
         ("DFS", g.depth_first_search),
@@ -26,8 +33,9 @@ if __name__ == "__main__":
 
     for nome, func in buscas:
         caminho, pai = func(inicio, destino)
+        print(f"--- {nome} ---")
         if caminho:
-            print(f"{nome}: Caminho de {inicio} a {destino}: {caminho}")
+            print(f"Caminho encontrado: {g.caminho_com_nomes(caminho)}")
         else:
-            print(f"{nome}: Caminho não encontrado.")
-        print(f"Pais: {pai}\n")
+            print("Caminho não encontrado")
+        print(f"Pais dos vértices: {pai}\n")

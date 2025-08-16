@@ -5,6 +5,11 @@ class Grafo_MatrizAdjacencia:
     def __init__(self, vertices):
         self.vertices = vertices
         self.matriz = [[0 for _ in range(vertices)] for _ in range(vertices)]
+        self.nomes = [f"V{i}" for i in range(vertices)]  # nomes padrão
+
+    def definir_nome(self, vertice, nome):
+        if 0 <= vertice < self.vertices:
+            self.nomes[vertice] = nome
 
     def adicionar_aresta(self, origem, destino, peso=1):
         if 0 <= origem < self.vertices and 0 <= destino < self.vertices:
@@ -17,16 +22,12 @@ class Grafo_MatrizAdjacencia:
             self.matriz[destino][origem] = 0
 
     def exibir_matriz(self):
-        for linha in self.matriz:
-            print(" ".join(f"{peso:3}" for peso in linha))
+        print("   " + " ".join(f"{nome:3}" for nome in self.nomes))
+        for i, linha in enumerate(self.matriz):
+            print(f"{self.nomes[i]:3} " + " ".join(f"{peso:3}" for peso in linha))
 
-    def obter_arestas(self):
-        arestas = []
-        for i in range(self.vertices):
-            for j in range(i + 1, self.vertices):
-                if self.matriz[i][j] != 0:
-                    arestas.append((i, j, self.matriz[i][j]))
-        return arestas
+    def caminho_com_nomes(self, caminho):
+        return [self.nomes[v] for v in caminho]
 
     # ===================== DFS =====================
     def depth_first_search(self, inicio, objetivo):
@@ -120,7 +121,7 @@ class Grafo_MatrizAdjacencia:
 
         return None, pai
 
-    # ===================== Depth Limited Search =====================
+    # ===================== DLS =====================
     def depth_limited_search(self, inicio, objetivo, limite):
         pai = [-1] * self.vertices
         visitado = [False] * self.vertices
@@ -146,7 +147,7 @@ class Grafo_MatrizAdjacencia:
 
         return None, pai
 
-    # ===================== Iterative Deepening Search =====================
+    # ===================== IDS =====================
     def iterative_deepening_search(self, inicio, objetivo):
         limite = 0
         while True:
