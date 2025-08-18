@@ -13,13 +13,11 @@ class Grafo_MatrizAdjacencia:
 
     def adicionar_aresta(self, origem, destino, peso=1):
         if 0 <= origem < self.vertices and 0 <= destino < self.vertices:
-            self.matriz[origem][destino] = peso
-            self.matriz[destino][origem] = peso  # grafo não direcionado
+            self.matriz[origem][destino] = peso  # apenas de origem → destino
 
     def remover_aresta(self, origem, destino):
         if 0 <= origem < self.vertices and 0 <= destino < self.vertices:
-            self.matriz[origem][destino] = 0
-            self.matriz[destino][origem] = 0
+            self.matriz[origem][destino] = 0  # apenas de origem → destino
 
     def exibir_matriz(self):
         print("   " + " ".join(f"{nome:3}" for nome in self.nomes))

@@ -1,41 +1,93 @@
-from grafos import Grafo_MatrizAdjacencia
+# main.py
+from habilidades import construir_skill_tree, custo_do_caminho, imprimir_resultado
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import colors
+
+def plot_matriz_elemento(g, stats, elemento):
+    # Pega os índices das magias do elemento
+    indices = [i for i, s in stats.items() if s.tipo == elemento]
+    n = len(indices)
+    matriz = np.zeros((n, n))
+
+    # Preenche a matriz com os custos
+    for i_idx, u in enumerate(indices):
+        for j_idx, v in enumerate(indices):
+            if u == v:
+                matriz[i_idx, j_idx] = -1  # marcar a diagonal
+            else:
+                matriz[i_idx, j_idx] = g.matriz[u][v]
+
+    # Cria mapa de cores: diagonal cinza, resto viridis
+    cmap = plt.cm.viridis
+    cmap_diagonal = colors.ListedColormap(['gray'])
+    bounds = [-1.5, -0.5, np.max(matriz)]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
+
+    fig, ax = plt.subplots(figsize=(6,6))
+    cax = ax.matshow(matriz, cmap=cmap, vmin=0, vmax=np.max(matriz))
+    
+    # Marca a diagonal com cinza
+    for i in range(n):
+        ax.matshow(np.array([[matriz[i,i]]]), cmap=cmap_diagonal, vmin=-1, vmax=-1, extent=(i,i+1,i,i+1))
+
+    fig.colorbar(cax)
+
+    # Labels
+    nomes = [g.nomes[i] for i in indices]
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(nomes, rotation=90)
+    ax.set_yticklabels(nomes)
+    ax.set_title(f"Matriz de adjacência: {elemento}")
+    plt.tight_layout()
+    plt.show()
+
+
+def testar_busca(g, stats, inicio_nome, objetivo_nome):
+    idx = {nome: i for i, nome in enumerate(g.nomes)}
+    inicio = idx[inicio_nome]
+    objetivo = idx[objetivo_nome]
+
+    print("\n" + "="*40)
+    print(f"Caminho de {inicio_nome} até {objetivo_nome}")
+    print("="*40)
+
+    # ===== DFS =====
+    print("\n[DFS - Depth First Search]")
+    caminho, _ = g.depth_first_search(inicio, objetivo)
+    imprimir_resultado(g, "DFS", caminho)
+
+    # ===== BFS =====
+    print("\n[BFS - Breadth First Search]")
+    caminho, _ = g.breadth_first_search(inicio, objetivo)
+    imprimir_resultado(g, "BFS", caminho)
+
+    # ===== UCS =====
+    print("\n[UCS - Uniform Cost Search]")
+    caminho, _ = g.uniform_cost_search(inicio, objetivo)
+    imprimir_resultado(g, "UCS", caminho)
+
+    # ===== DLS =====
+    limite = 4
+    print(f"\n[DLS - Depth Limited Search (limite={limite})]")
+    caminho, _ = g.depth_limited_search(inicio, objetivo, limite)
+    imprimir_resultado(g, f"DLS (limite={limite})", caminho)
+
+    # ===== IDS =====
+    print("\n[IDS - Iterative Deepening Search]")
+    caminho, _ = g.iterative_deepening_search(inicio, objetivo)
+    imprimir_resultado(g, "IDS", caminho)
+
+
 if __name__ == "__main__":
-    # Criar grafo com 5 vértices
-    g = Grafo_MatrizAdjacencia(5)
+    g, stats, idx = construir_skill_tree()
 
-    # Definir nomes para os vértices
-    nomes = ["Casa A", "Casa B", "Casa C", "Casa D", "Casa E"]
-    for i, nome in enumerate(nomes):
-        g.definir_nome(i, nome)
+    # ===== Plot das matrizes por elemento =====
+    elementos = ["Terra", "Fogo", "Água", "Ar"]
+    for elemento in elementos:
+        plot_matriz_elemento(g, stats, elemento)
 
-    # Adicionar arestas (com pesos)
-    g.adicionar_aresta(0, 1, 2)
-    g.adicionar_aresta(0, 2, 4)
-    g.adicionar_aresta(1, 2, 1)
-    g.adicionar_aresta(1, 3, 7)
-    g.adicionar_aresta(2, 4, 3)
-
-    # Exibir matriz
-    print("Matriz de adjacência:")
-    g.exibir_matriz()
-    print()
-
-    inicio = 0  # Casa A
-    destino = 4  # Casa E
-
-    buscas = [
-        ("DFS", g.depth_first_search),
-        ("BFS", g.breadth_first_search),
-        ("UCS", g.uniform_cost_search),
-        ("IDS", g.iterative_deepening_search),
-        ("DLS (limite 3)", lambda s, d: g.depth_limited_search(s, d, limite=3))
-    ]
-
-    for nome, func in buscas:
-        caminho, pai = func(inicio, destino)
-        print(f"--- {nome} ---")
-        if caminho:
-            print(f"Caminho encontrado: {g.caminho_com_nomes(caminho)}")
-        else:
-            print("Caminho não encontrado")
-        print(f"Pais dos vértices: {pai}\n")
+    # ===== Teste de buscas =====
+    testar_busca(g, stats, "Pedregulho", "Meteoro de Terra")
+    testar_busca(g, stats, "Brasa", "Inferno")
